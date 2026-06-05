@@ -14,17 +14,15 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig)
 export const db = getFirestore(firebaseApp)
 
-export function flattenPicks(picks) {
+function flattenPicks(picks) {
   const flat = {}
   picks.forEach((pot, pi) => {
-    pot.forEach((team, ti) => {
-      flat[`${pi}_${ti}`] = team ?? ''
-    })
+    pot.forEach((team, ti) => { flat[`${pi}_${ti}`] = team ?? '' })
   })
   return flat
 }
 
-export function unflattenPicks(flat) {
+function unflattenPicks(flat) {
   const picks = Array.from({ length: 6 }, () => new Array(8).fill(null))
   Object.entries(flat).forEach(([key, val]) => {
     const [pi, ti] = key.split('_').map(Number)
@@ -33,23 +31,36 @@ export function unflattenPicks(flat) {
   return picks
 }
 
+export async function savePicks(payload) {
+  const ref = doc(db, 'pool', 'state')
+  const picks = Array.isArray(payload) ? payload : payload.picks
+  const results = Array.isArray(payload) ? {} : (payload.results || {})
+  await setDoc(ref, {
+    picks: flattenPicks(picks),
+    results: results
+  })
+}
+
 export async function loadPicks() {
   const ref = doc(db, 'pool', 'state')
   const snap = await getDoc(ref)
   if (!snap.exists()) return null
-  return unflattenPicks(snap.data())
-}
-
-export async function savePicks(picks) {
-  const ref = doc(db, 'pool', 'state')
-  await setDoc(ref, flattenPicks(picks))
+  const data = snap.data()
+  return {
+    picks: data.picks ? unflattenPicks(data.picks) : null,
+    results: data.results || {}
+  }
 }
 
 export function subscribePicks(callback) {
   const ref = doc(db, 'pool', 'state')
   return onSnapshot(ref, (snap) => {
     if (snap.exists()) {
-      callback(unflattenPicks(snap.data()))
+      const data = snap.data()
+      callback({
+        picks: data.picks ? unflattenPicks(data.picks) : null,
+        results: data.results || {}
+      })
     }
   })
 }
