@@ -209,7 +209,7 @@ export default function App() {
   async function persist(newPicks, newResults) {
     setSaving(true)
     try { await savePicks({ picks: newPicks, results: newResults }) }
-    catch { setError('Failed to save. Please try again.') }
+    } catch (e) { setError('Failed to save: ' + (e?.message || JSON.stringify(e))) }
     finally { setSaving(false) }
   }
 
