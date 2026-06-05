@@ -163,20 +163,25 @@ export default function App() {
   const [passwordInput, setPasswordInput] = useState('')
   const [passwordError, setPasswordError] = useState(false)
 
-  const COMMISSIONER_PASSWORD = 'Addie'
+  const PASSWORDS = {
+    'Tucker':  'Addie',
+    'Burns':   'Maine',
+    'Seabass': 'Tennis',
+    'Z':       'Surly Z',
+    'Tex':     'Cowboy Hat',
+    'Chabal':  'Sales Guy',
+    'Jason':   'Chill',
+    'Jack':    'Michael & Son',
+  }
 
   function handleNameClick(name) {
-    if (name === COMMISSIONER) {
-      setPendingName(name)
-      setPasswordInput('')
-      setPasswordError(false)
-    } else {
-      setActiveName(name)
-    }
+    setPendingName(name)
+    setPasswordInput('')
+    setPasswordError(false)
   }
 
   function handlePasswordSubmit() {
-    if (passwordInput === COMMISSIONER_PASSWORD) {
+    if (passwordInput === PASSWORDS[pendingName]) {
       setActiveName(pendingName)
       setPendingName(null)
       setPasswordInput('')
@@ -209,7 +214,7 @@ export default function App() {
   async function persist(newPicks, newResults) {
     setSaving(true)
     try { await savePicks({ picks: newPicks, results: newResults }) }
-    catch (e) { setError('Failed to save: ' + (e?.message || JSON.stringify(e))) }
+    catch { setError('Failed to save. Please try again.') }
     finally { setSaving(false) }
   }
 
@@ -346,9 +351,9 @@ export default function App() {
                     onClick={() => { setPendingName(null); setPasswordError(false) }}>
                     <div style={{ background: '#141B26', border: `2px solid ${gold}`, borderRadius: 14, padding: '28px 24px', maxWidth: 340, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.7)', textAlign: 'center' }}
                       onClick={e => e.stopPropagation()}>
-                      <div style={{ fontSize: 28, marginBottom: 10 }}>🔑</div>
-                      <div style={{ fontWeight: 700, fontSize: 18, color: '#e8dcc8', marginBottom: 6 }}>Commissioner Access</div>
-                      <div style={{ fontSize: 13, color: '#9a8a6a', marginBottom: 20 }}>Enter the password to log in as Tucker</div>
+                      <div style={{ fontSize: 28, marginBottom: 10 }}>🔒</div>
+                      <div style={{ fontWeight: 700, fontSize: 18, color: '#e8dcc8', marginBottom: 6 }}>{pendingName}</div>
+                      <div style={{ fontSize: 13, color: '#9a8a6a', marginBottom: 20 }}>Enter your password to continue</div>
                       <input
                         type="password"
                         value={passwordInput}
